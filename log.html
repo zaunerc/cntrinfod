@@ -1,0 +1,19 @@
+<html>
+
+	<head></head>
+
+	<body>
+		
+	<h1>Log files</h1>
+
+	{{range .}}
+		<h2>{{.ParentPath}}</h2>
+		<h3>{{.Path}}</h3>
+<pre>
+{{.Text}}
+</pre>
+	{{end}}
+
+	</body>
+
+</html>

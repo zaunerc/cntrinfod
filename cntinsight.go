@@ -5,13 +5,16 @@ import (
         "bytes"
 	"fmt"
 	"html/template"
+        "io"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"regexp"
 	"strings"
 
-	"github.com/russross/blackfriday"
+        "github.com/shurcooL/github_flavored_markdown"
+	"github.com/shurcooL/github_flavored_markdown/gfmstyle"
+        //"github.com/russross/blackfriday"
 )
 
 type Page struct {
@@ -38,7 +41,7 @@ func convertMdToHtml(pathToFile string) (*Page, error) {
             pageAsMarkdown = append(pageAsMarkdown, appendixLine + "\n"...)
         }
         
-        pageAsHtml := blackfriday.MarkdownBasic(pageAsMarkdown)
+        pageAsHtml := github_flavored_markdown.Markdown(pageAsMarkdown)
 
 	if error != nil {
 		return nil, error
@@ -127,6 +130,10 @@ func init() {
 func main() {
 	http.HandleFunc("/", handler)
 	http.HandleFunc("/log", logHandler)
+        
+        // Serve the "/assets/gfm.css" file.
+        http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(gfmstyle.Assets)))
+        
 	http.ListenAndServe(":8080", nil)
 }
 
@@ -161,7 +168,10 @@ func getReadmeAsMarkdown() []string {
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	page, _ := convertMdToHtml("testdata/README.md")
+        
+        io.WriteString(w, `<html><head><meta charset="utf-8"><link href="/assets/gfm.css" media="all" rel="stylesheet" type="text/css" /><link href="//cdnjs.cloudflare.com/ajax/libs/octicons/2.1.2/octicons.css" media="all" rel="stylesheet" type="text/css" /></head><body><article class="markdown-body entry-content" style="padding: 30px;">`)
         w.Write(page.Html)
+        io.WriteString(w, `</article></body></html>`)
 }
 
 func logHandler(w http.ResponseWriter, r *http.Request) {

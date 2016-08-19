@@ -1,4 +1,7 @@
 * Use logging.
 * Functions which searches for README.md in various places and return an fd.
+* Use []byte instead of []string. Most stdlib functions require this data type.
+* Log file beautifier JS lib.
+* Truncate / delete logs.
 
 

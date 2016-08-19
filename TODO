@@ -3,5 +3,5 @@
 * Use []byte instead of []string. Most stdlib functions require this data type.
 * Log file beautifier JS lib.
 * Truncate / delete logs.
-
+* Show generated Markdown.
 

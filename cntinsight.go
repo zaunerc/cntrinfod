@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+        "bytes"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -28,28 +29,40 @@ type Log struct {
 func convertMdToHtml(pathToFile string) (*Page, error) {
 
 	pageAsMarkdown, error := ioutil.ReadFile(pathToFile)
-	pageAsHtml := blackfriday.MarkdownBasic(pageAsMarkdown)
+
+
+        appendix := enrichMd(getReadmeAsMarkdown())
+        // Make sure that there is at least one newline before our heading
+        pageAsMarkdown = append(pageAsMarkdown, "\n"...)
+        for _, appendixLine := range appendix {
+            pageAsMarkdown = append(pageAsMarkdown, appendixLine + "\n"...)
+        }
+        
+        pageAsHtml := blackfriday.MarkdownBasic(pageAsMarkdown)
 
 	if error != nil {
 		return nil, error
 	}
-
+        
 	return &Page{Path: pathToFile, Markdown: pageAsMarkdown, Html: pageAsHtml}, nil
 }
 
 /**
  * Adds various informations to the README.md of the container.
  */
-func enrichMd(pathToFile string) (*Page, error) {
-
-	pageAsMarkdown, error := ioutil.ReadFile(pathToFile)
-	pageAsHtml := blackfriday.MarkdownBasic(pageAsMarkdown)
-
+func enrichMd(rdmeAsMdArr []string) (enrichedRdmeAsMdArr []string) { 
+    
+	appendixTemplate, error := template.ParseFiles("appendix_template.md")
+        var doc bytes.Buffer 
+        error = appendixTemplate.Execute(&doc, nil)
+        s := doc.String()
+        
 	if error != nil {
-		return nil, error
+                fmt.Printf("Error while processing template: >%s<.", error)
+		return rdmeAsMdArr
 	}
 
-	return &Page{Path: pathToFile, Markdown: pageAsMarkdown, Html: pageAsHtml}, nil
+	return append(enrichedRdmeAsMdArr, strings.Split(s, "\n")...)
 }
 
 // `/var/log/AdminServer` - sshd log file
@@ -117,7 +130,7 @@ func main() {
 	http.ListenAndServe(":8080", nil)
 }
 
-func getReadmeAsMarkdown() []byte {
+func getReadmeAsMarkdown() []string {
 
 	var possibleLocations [2]string = [2]string{"/README.md",
 		"testdata/README.md"}
@@ -130,19 +143,25 @@ func getReadmeAsMarkdown() []byte {
 			break
 		}
 	}
-	fd.Close()
-
+        defer fd.Close()
+	
 	if err == nil {
 		fmt.Printf("Could not find README.md file.")
 		os.Exit(-1)
 	}
 
-	return nil
+	var lines []string
+	scanner := bufio.NewScanner(fd)
+        for scanner.Scan() {
+            lines = append(lines, scanner.Text())
+        }
+	
+	return lines
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	page, _ := convertMdToHtml("testdata/README.md")
-	w.Write(page.Html)
+        w.Write(page.Html)
 }
 
 func logHandler(w http.ResponseWriter, r *http.Request) {

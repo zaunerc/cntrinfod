@@ -139,6 +139,8 @@ func main() {
 
 	app.Action = func(c *cli.Context) error {
 
+		fmt.Printf("Starting daemon on port 8080...\n")
+	
 		http.HandleFunc("/", handler)
 		http.HandleFunc("/log", logHandler)
 
@@ -160,9 +162,10 @@ func getReadmeAsMarkdown() []string {
 
 	var fd *os.File
 	var err error
+	
 	for _, possibleLocation := range possibleLocations {
 		fd, err = os.Open(possibleLocation)
-		if err != nil {
+		if err == nil {
 			fmt.Printf("Found README.md file: >%s<\n", possibleLocation)
 			break
 		} else {
@@ -171,7 +174,7 @@ func getReadmeAsMarkdown() []string {
 	}
 	defer fd.Close()
 
-	if err == nil {
+	if err != nil {
 		fmt.Printf("Could not find README.md file.\n")
 		os.Exit(-1)
 	}

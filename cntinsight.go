@@ -163,13 +163,16 @@ func getReadmeAsMarkdown() []string {
 	for _, possibleLocation := range possibleLocations {
 		fd, err = os.Open(possibleLocation)
 		if err != nil {
+			fmt.Printf("Found README.md file: >%s<\n", possibleLocation)
 			break
+		} else {
+			fmt.Printf("Error when looking for README.md at >%s<: >%s<\n", possibleLocation, err)
 		}
 	}
 	defer fd.Close()
 
 	if err == nil {
-		fmt.Printf("Could not find README.md file.")
+		fmt.Printf("Could not find README.md file.\n")
 		os.Exit(-1)
 	}
 

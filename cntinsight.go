@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"regexp"
@@ -14,7 +13,6 @@ import (
 
 	"github.com/shurcooL/github_flavored_markdown"
 	"github.com/shurcooL/github_flavored_markdown/gfmstyle"
-	//"github.com/russross/blackfriday"
 	"github.com/urfave/cli"
 )
 
@@ -30,42 +28,31 @@ type Log struct {
 	Text       string
 }
 
-func convertMdToHtml(pathToFile string) (*Page, error) {
+func convertMdToHtml(readme []byte) (*Page, error) {
 
-	pageAsMarkdown, error := ioutil.ReadFile(pathToFile)
+	enrichedReadme := enrichMd(getReadmeAsMarkdown())
 
-	appendix := enrichMd(getReadmeAsMarkdown())
 	// Make sure that there is at least one newline before our heading
-	pageAsMarkdown = append(pageAsMarkdown, "\n"...)
-	for _, appendixLine := range appendix {
-		pageAsMarkdown = append(pageAsMarkdown, appendixLine+"\n"...)
-	}
 
-	pageAsHtml := github_flavored_markdown.Markdown(pageAsMarkdown)
-
-	if error != nil {
-		return nil, error
-	}
-
-	return &Page{Path: pathToFile, Markdown: pageAsMarkdown, Html: pageAsHtml}, nil
+	readmeAsHtml := github_flavored_markdown.Markdown(enrichedReadme)
+	return &Page{Path: "FIXME", Markdown: enrichedReadme, Html: readmeAsHtml}, nil
 }
 
 /**
  * Adds various informations to the README.md of the container.
  */
-func enrichMd(rdmeAsMdArr []string) (enrichedRdmeAsMdArr []string) {
+func enrichMd(readme []byte) []byte {
 
 	appendixTemplate, error := template.ParseFiles("appendix_template.md")
-	var doc bytes.Buffer
-	error = appendixTemplate.Execute(&doc, nil)
-	s := doc.String()
+	var appendixBuffer bytes.Buffer
+	error = appendixTemplate.Execute(&appendixBuffer, nil)
 
 	if error != nil {
 		fmt.Printf("Error while processing template: >%s<.", error)
-		return rdmeAsMdArr
+		return readme
 	}
 
-	return append(enrichedRdmeAsMdArr, strings.Split(s, "\n")...)
+	return append(readme, appendixBuffer.Bytes()...)
 }
 
 // `/var/log/AdminServer` - sshd log file
@@ -140,7 +127,7 @@ func main() {
 	app.Action = func(c *cli.Context) error {
 
 		fmt.Printf("Starting daemon on port 8080...\n")
-	
+
 		http.HandleFunc("/", handler)
 		http.HandleFunc("/log", logHandler)
 
@@ -155,14 +142,14 @@ func main() {
 	app.Run(os.Args)
 }
 
-func getReadmeAsMarkdown() []string {
+func getReadmeAsMarkdown() []byte {
 
 	var possibleLocations [2]string = [2]string{"/README.md",
 		"testdata/README.md"}
 
 	var fd *os.File
 	var err error
-	
+
 	for _, possibleLocation := range possibleLocations {
 		fd, err = os.Open(possibleLocation)
 		if err == nil {
@@ -179,17 +166,17 @@ func getReadmeAsMarkdown() []string {
 		os.Exit(-1)
 	}
 
-	var lines []string
+	var readme []byte
 	scanner := bufio.NewScanner(fd)
 	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
+		readme = append(readme, scanner.Bytes()...)
 	}
 
-	return lines
+	return readme
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	page, _ := convertMdToHtml("testdata/README.md")
+	page, _ := convertMdToHtml(getReadmeAsMarkdown())
 
 	io.WriteString(w, `<html><head><meta charset="utf-8"><link href="/assets/gfm.css" media="all" rel="stylesheet" type="text/css" /><link href="//cdnjs.cloudflare.com/ajax/libs/octicons/2.1.2/octicons.css" media="all" rel="stylesheet" type="text/css" /></head><body><article class="markdown-body entry-content" style="padding: 30px;">`)
 	w.Write(page.Html)

@@ -30,12 +30,13 @@ type Log struct {
 
 func convertMdToHtml(readme []byte) (*Page, error) {
 
-	enrichedReadme := enrichMd(getReadmeAsMarkdown())
+	location := locateReadme()
+	enrichedReadme := enrichMd(getReadmeAsMarkdown(location))
 
 	// Make sure that there is at least one newline before our heading
 
 	readmeAsHtml := github_flavored_markdown.Markdown(enrichedReadme)
-	return &Page{Path: "FIXME", Markdown: enrichedReadme, Html: readmeAsHtml}, nil
+	return &Page{Path: location, Markdown: enrichedReadme, Html: readmeAsHtml}, nil
 }
 
 /**
@@ -142,27 +143,44 @@ func main() {
 	app.Run(os.Args)
 }
 
-func getReadmeAsMarkdown() []byte {
+func locateReadme() string {
 
 	var possibleLocations [2]string = [2]string{"/README.md",
 		"testdata/README.md"}
 
 	var fd *os.File
+	defer fd.Close()
 	var err error
 
+	var location string
 	for _, possibleLocation := range possibleLocations {
 		fd, err = os.Open(possibleLocation)
 		if err == nil {
 			fmt.Printf("Found README.md file: >%s<\n", possibleLocation)
+			location = possibleLocation
 			break
 		} else {
 			fmt.Printf("Error when looking for README.md at >%s<: >%s<\n", possibleLocation, err)
 		}
 	}
-	defer fd.Close()
 
 	if err != nil {
 		fmt.Printf("Could not find README.md file.\n")
+		os.Exit(-1)
+	}
+
+	return location
+}
+
+func getReadmeAsMarkdown(path string) []byte {
+
+	var fd *os.File
+	defer fd.Close()
+	var err error
+
+	fd, err = os.Open(path)
+	if err != nil {
+		fmt.Printf("Error while trying to open REAMDE.md file: %s\n", err)
 		os.Exit(-1)
 	}
 
@@ -170,13 +188,16 @@ func getReadmeAsMarkdown() []byte {
 	scanner := bufio.NewScanner(fd)
 	for scanner.Scan() {
 		readme = append(readme, scanner.Bytes()...)
+		readme = append(readme, "\n"...)
 	}
+
+	fmt.Printf("%s", readme)
 
 	return readme
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	page, _ := convertMdToHtml(getReadmeAsMarkdown())
+	page, _ := convertMdToHtml(getReadmeAsMarkdown(locateReadme()))
 
 	io.WriteString(w, `<html><head><meta charset="utf-8"><link href="/assets/gfm.css" media="all" rel="stylesheet" type="text/css" /><link href="//cdnjs.cloudflare.com/ajax/libs/octicons/2.1.2/octicons.css" media="all" rel="stylesheet" type="text/css" /></head><body><article class="markdown-body entry-content" style="padding: 30px;">`)
 	w.Write(page.Html)

@@ -56,6 +56,7 @@ func enrichMd(readme []byte) []byte {
 	return append(readme, appendixBuffer.Bytes()...)
 }
 
+// Use getReadmeAsMarkdown
 // `/var/log/AdminServer` - sshd log file
 func parseLogFilePathsFromMd(pathToFile string) (*[]string, error) {
 
@@ -206,7 +207,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 func logHandler(w http.ResponseWriter, r *http.Request) {
 
-	pathToLogFiles, _ := parseLogFilePathsFromMd("testdata/README.md")
+	pathToLogFiles, _ := parseLogFilePathsFromMd(locateReadme())
 	logs, _ := readLogFiles(pathToLogFiles)
 
 	t, error := template.ParseFiles("log.html")

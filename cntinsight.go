@@ -10,6 +10,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/shurcooL/github_flavored_markdown"
 	"github.com/shurcooL/github_flavored_markdown/gfmstyle"
@@ -211,7 +212,15 @@ func logHandler(w http.ResponseWriter, r *http.Request) {
 	logs, _ := readLogFiles(pathToLogFiles)
 
 	t, error := template.ParseFiles("log.html")
-	error = t.Execute(w, logs)
+
+	currentDateAndTime := time.Now().Format("2006-01-02 15:04:05")
+
+	vars := map[string]interface{}{
+		"Logs":               logs,
+		"CurrentDateAndTime": currentDateAndTime,
+	}
+
+	error = t.Execute(w, vars)
 
 	if error != nil {
 		fmt.Printf("Error while processing template: >%s<.", error)

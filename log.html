@@ -4,9 +4,15 @@
 
 	<body>
 		
+	<h1>Various informations</h1>
+	
+	<ul>
+		<li>Current date and time: {{.CurrentDateAndTime}}</li>
+	</ul>
+
 	<h1>Log files</h1>
 
-	{{range .}}
+	{{range .Logs}}
 		<h2>{{.ParentPath}}</h2>
 		<h3>{{.Path}}</h3>
 <pre>

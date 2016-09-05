@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -119,7 +120,25 @@ func init() {
 
 func main() {
 
+	var httpPort int
+	var httpsPort int
+
 	app := cli.NewApp()
+
+	app.Flags = []cli.Flag{
+		cli.IntFlag{
+			Name:        "httpPort, p",
+			Value:       2020,
+			Usage:       "Listen on port `PORT` for HTTP connections",
+			Destination: &httpPort,
+		},
+		cli.IntFlag{
+			Name:        "httpsPort, s",
+			Value:       3030,
+			Usage:       "Listen on port `PORT` for HTTPS connections",
+			Destination: &httpsPort,
+		},
+	}
 
 	app.Email = "christoph.zauner@NLLK.net"
 	app.Author = "Christoph Zauner"
@@ -129,7 +148,7 @@ func main() {
 
 	app.Action = func(c *cli.Context) error {
 
-		fmt.Printf("Starting daemon on port 8080...\n")
+		fmt.Printf("Starting HTTP daemon on port %d...\n", httpPort)
 
 		http.HandleFunc("/", handler)
 		http.HandleFunc("/log", logHandler)
@@ -137,7 +156,7 @@ func main() {
 		// Serve the "/assets/gfm.css" file.
 		http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(gfmstyle.Assets)))
 
-		http.ListenAndServe(":8080", nil)
+		http.ListenAndServe(":"+strconv.Itoa(httpPort), nil)
 
 		return nil
 	}

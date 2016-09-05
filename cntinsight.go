@@ -150,8 +150,8 @@ func main() {
 
 		fmt.Printf("Starting HTTP daemon on port %d...\n", httpPort)
 
-		http.HandleFunc("/", handler)
-		http.HandleFunc("/log", logHandler)
+		http.HandleFunc("/", protect(handler))
+		http.HandleFunc("/log", protect(logHandler))
 
 		// Serve the "/assets/gfm.css" file.
 		http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(gfmstyle.Assets)))
@@ -162,6 +162,25 @@ func main() {
 	}
 
 	app.Run(os.Args)
+}
+
+func protect(fn http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if checkAuth(w, r) {
+			fn(w, r)
+		} else {
+			w.Header().Set("WWW-Authenticate", `Basic realm="Linux PAM"`)
+			w.WriteHeader(401)
+			w.Write([]byte("401 Unauthorized\n"))
+		}
+
+	}
+}
+
+func checkAuth(w http.ResponseWriter, r *http.Request) bool {
+	user, pass, _ := r.BasicAuth()
+	fmt.Printf("User trying to authenticate using the following credentials: username - >%s< password - >%s<", user, pass)
+	return user == "user" && pass == "pass"
 }
 
 func locateReadme() string {

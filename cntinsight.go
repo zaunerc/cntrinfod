@@ -154,6 +154,7 @@ func main() {
 
 		http.HandleFunc("/", protect(handler))
 		http.HandleFunc("/log", protect(logHandler))
+		http.HandleFunc("/hostinfo", protect(hostInfoHandler))
 
 		// Serve the "/assets/gfm.css" file.
 		http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(gfmstyle.Assets)))
@@ -263,6 +264,17 @@ func logHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	error = t.Execute(w, vars)
+
+	if error != nil {
+		fmt.Printf("Error while processing template: >%s<.", error)
+	}
+}
+
+func hostInfoHandler(w http.ResponseWriter, r *http.Request) {
+	t, error := template.ParseFiles("hostinfo.html")
+
+	hostinfo := docker.FetchHostInfo()
+	error = t.Execute(w, hostinfo)
 
 	if error != nil {
 		fmt.Printf("Error while processing template: >%s<.", error)

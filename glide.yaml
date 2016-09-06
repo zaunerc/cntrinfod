@@ -1,0 +1,17 @@
+package: github.com/zaunerc/cntinsight
+import:
+- package: github.com/docker/engine-api
+  version: release/1.12
+  # Does not compile using Go 1.6 as of 611c63f5121770f6d0db2f9988458310ccbfbe74.
+  #version: master
+  subpackages:
+  - client
+  - types
+- package: github.com/shurcooL/github_flavored_markdown
+  subpackages:
+  - gfmstyle
+- package: github.com/urfave/cli
+  version: v1.18.1
+- package: golang.org/x/net
+  subpackages:
+  - context

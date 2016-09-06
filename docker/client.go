@@ -12,7 +12,7 @@ import (
 	"golang.org/x/net/context"
 )
 
-func fetchHostsHostname() string {
+func FetchHostsHostname() string {
 	defaultHeaders := map[string]string{"User-Agent": "engine-api-cli-1.0"}
 	cli, err := client.NewClient("unix:///var/run/docker.sock", "v1.22", nil, defaultHeaders)
 	if err != nil {
@@ -28,4 +28,6 @@ func fetchHostsHostname() string {
 	for _, c := range containers {
 		fmt.Println(c.ID)
 	}
+
+	return ""
 }

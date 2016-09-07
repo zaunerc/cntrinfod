@@ -37,8 +37,6 @@ func convertMdToHtml(readme []byte) (*Page, error) {
 
 	location := locateReadme()
 	enrichedReadme := enrichMd(getReadmeAsMarkdown(location))
-	fmt.Printf(string(enrichedReadme))
-	// Make sure that there is at least one newline before our heading
 
 	readmeAsHtml := github_flavored_markdown.Markdown(enrichedReadme)
 	return &Page{Path: location, Markdown: enrichedReadme, Html: readmeAsHtml}, nil
@@ -68,6 +66,8 @@ func enrichMd(readme []byte) []byte {
 		return readme
 	}
 
+	// Make sure that there is at least one newline before our heading
+	readme = append(readme, "\n"...)
 	return append(readme, appendixBuffer.Bytes()...)
 }
 
@@ -166,6 +166,7 @@ func main() {
 		http.HandleFunc("/", protect(handler))
 		http.HandleFunc("/log", protect(logHandler))
 		http.HandleFunc("/hostinfo", protect(hostInfoHandler))
+		http.HandleFunc("/markdown", protect(markdownHandler))
 
 		// Serve the "/assets/gfm.css" file.
 		http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(gfmstyle.Assets)))
@@ -193,7 +194,7 @@ func protect(fn http.HandlerFunc) http.HandlerFunc {
 
 func checkAuth(w http.ResponseWriter, r *http.Request) bool {
 	user, pass, _ := r.BasicAuth()
-	fmt.Printf("User trying to authenticate using the following credentials: username - >%s< password - >%s<", user, pass)
+	fmt.Printf("User >%s< trying to authenticate\n", user)
 	return user == "user" && pass == "pass"
 }
 
@@ -245,8 +246,6 @@ func getReadmeAsMarkdown(path string) []byte {
 		readme = append(readme, "\n"...)
 	}
 
-	fmt.Printf("%s", readme)
-
 	return readme
 }
 
@@ -285,6 +284,18 @@ func hostInfoHandler(w http.ResponseWriter, r *http.Request) {
 	hostinfo := docker.FetchHostInfo()
 	error = t.Execute(w, hostinfo)
 
+	if error != nil {
+		fmt.Printf("Error while processing template: >%s<.", error)
+	}
+}
+
+func markdownHandler(w http.ResponseWriter, r *http.Request) {
+
+	readmeAsMarkdown := getReadmeAsMarkdown(locateReadme())
+	enrichedReadme := enrichMd(readmeAsMarkdown)
+
+	t, error := template.ParseFiles("markdown.html")
+	error = t.Execute(w, string(enrichedReadme))
 	if error != nil {
 		fmt.Printf("Error while processing template: >%s<.", error)
 	}

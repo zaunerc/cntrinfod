@@ -11,7 +11,14 @@
 
 * Hostname: {{.ContainerHostname}}
 
-### netstat
+### TCP4/6 Listening Sockets
+
+| Proto | Local Address | Foreign Address | State | User | PID | Program name |
+|-------|---------------|-----------------|-------|------|-----|--------------|
+{{range .TcpSocketInfo}}| {{.Protocol}} | {{.LocalIP}}:{{.LocalPort}} | {{.RemoteIP}}:{{.RemotePort}} | {{.State}} | {{.User}} | {{.Pid}} | {{.ProgramName}} |
+{{end}}
+
+### UDP4/6 Sockets
 
 ### ps
 

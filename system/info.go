@@ -2,7 +2,9 @@ package system
 
 import (
 	"fmt"
-	"github.com/drael/GOnetstat"
+	"github.com/shirou/gopsutil/net"
+	"github.com/shirou/gopsutil/process"
+	"github.com/zaunerc/cntinsight/types"
 	"os"
 )
 
@@ -11,62 +13,55 @@ func FetchContainerHostname() string {
 	return hostname
 }
 
-/*
- * FetchNetstatTcp gets TCP information and show like netstat.
- * Information like 'user' and 'name' of some processes will
- * not show if you don't have root permissions
- */
-func FetchNetstatTcp() string {
+func FetchTcp46SocketInfo() []types.TcpSocketInfo {
 
-	d := GOnetstat.Tcp()
+	var socketInfo []types.TcpSocketInfo
 
-	// format header
-	fmt.Printf("Proto %16s %20s %14s %24s\n", "Local Adress", "Foregin Adress",
-		"State", "Pid/Program")
+	socketInfo = append(socketInfo, fetchTcpSocketInfo("tcp4")...)
+	socketInfo = append(socketInfo, fetchTcpSocketInfo("tcp6")...)
 
-	for _, p := range d {
-
-		// Check STATE to show only Listening connections
-		if p.State == "LISTEN" {
-			// format data like netstat output
-			ip_port := fmt.Sprintf("%v:%v", p.Ip, p.Port)
-			fip_port := fmt.Sprintf("%v:%v", p.ForeignIp, p.ForeignPort)
-			pid_program := fmt.Sprintf("%v/%v", p.Pid, p.Name)
-
-			fmt.Printf("tcp %16v %20v %16v %20v\n", ip_port, fip_port,
-				p.State, pid_program)
-		}
-	}
-
-	return ""
+	return socketInfo
 }
 
 /*
- * FetchNetstatTcp6 gets TCP information and show like netstat.
- * Information like 'user' and 'name' of some processes will
- * not show if you don't have root permissions
+ * See https://github.com/shirou/gopsutil/blob/f20771d/net/net_linux.go#L258
+ * for connection kinds.
  */
-func FetchNetstatTcp6() string {
+func fetchTcpSocketInfo(kind string) []types.TcpSocketInfo {
 
-	d := GOnetstat.Tcp6()
+	var socketInfo []types.TcpSocketInfo
+	connections, _ := net.Connections(kind)
 
-	// format header
-	fmt.Printf("Proto %16s %20s %14s %24s\n", "Local Adress", "Foregin Adress",
-		"State", "Pid/Program")
+	for _, con := range connections {
 
-	for _, p := range d {
-
-		// Check STATE to show only Listening connections
-		if p.State == "LISTEN" {
-			// format data like netstat output
-			ip_port := fmt.Sprintf("%v:%v", p.Ip, p.Port)
-			fip_port := fmt.Sprintf("%v:%v", p.ForeignIp, p.ForeignPort)
-			pid_program := fmt.Sprintf("%v/%v", p.Pid, p.Name)
-
-			fmt.Printf("tcp %16v %20v %16v %20v\n", ip_port, fip_port,
-				p.State, pid_program)
+		// We are only interested in listening TCP sockets.
+		if con.Status != "LISTEN" {
+			continue
 		}
+
+		process, _ := process.NewProcess(con.Pid)
+
+		user, _ := process.Username()
+		programName, _ := process.Name()
+
+		info := types.TcpSocketInfo{Protocol: kind, LocalIP: con.Laddr.IP,
+			LocalPort: convertPortToStr(con.Laddr.Port), RemoteIP: con.Raddr.IP,
+			RemotePort: convertPortToStr(con.Raddr.Port), State: con.Status, User: user,
+			Pid: con.Pid, ProgramName: programName}
+
+		socketInfo = append(socketInfo, info)
 	}
 
-	return ""
+	return socketInfo
+}
+
+func convertPortToStr(port uint32) string {
+	var localPort string
+	if port == 0 {
+		localPort = "*"
+	} else {
+		localPort = fmt.Sprint(port)
+	}
+
+	return localPort
 }

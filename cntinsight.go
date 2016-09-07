@@ -37,7 +37,7 @@ func convertMdToHtml(readme []byte) (*Page, error) {
 
 	location := locateReadme()
 	enrichedReadme := enrichMd(getReadmeAsMarkdown(location))
-
+	fmt.Printf(string(enrichedReadme))
 	// Make sure that there is at least one newline before our heading
 
 	readmeAsHtml := github_flavored_markdown.Markdown(enrichedReadme)
@@ -52,13 +52,10 @@ func enrichMd(readme []byte) []byte {
 	appendixTemplate, error := template.ParseFiles("appendix_template.md")
 	var appendixBuffer bytes.Buffer
 
-	// TODO
-	system.FetchNetstatTcp()
-	system.FetchNetstatTcp6()
-
 	vars := map[string]interface{}{
 		"ContainerHostname": system.FetchContainerHostname(),
 		"HostHostname":      docker.FetchHostHostname(),
+		"TcpSocketInfo":     system.FetchTcp46SocketInfo(),
 	}
 
 	error = appendixTemplate.Execute(&appendixBuffer, vars)

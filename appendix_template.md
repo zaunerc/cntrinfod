@@ -20,6 +20,11 @@
 
 ### UDP4/6 Sockets
 
+| Proto | Local Address | Foreign Address | User | PID | Program name |
+|-------|---------------|-----------------|------|-----|--------------|
+{{range .UdpSocketInfo}}| {{.Protocol}} | {{.LocalIP}}:{{.LocalPort}} | {{.RemoteIP}}:{{.RemotePort}} | {{.User}} | {{.Pid}} | {{.ProgramName}} |
+{{end}}
+
 ### ps
 
 ### pstree

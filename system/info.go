@@ -55,6 +55,43 @@ func fetchTcpSocketInfo(kind string) []types.TcpSocketInfo {
 	return socketInfo
 }
 
+func FetchUdp46SocketInfo() []types.UdpSocketInfo {
+
+	var socketInfo []types.UdpSocketInfo
+
+	socketInfo = append(socketInfo, fetchUdpSocketInfo("udp4")...)
+	socketInfo = append(socketInfo, fetchUdpSocketInfo("udp6")...)
+
+	return socketInfo
+}
+
+/*
+ * See https://github.com/shirou/gopsutil/blob/f20771d/net/net_linux.go#L258
+ * for connection kinds.
+ */
+func fetchUdpSocketInfo(kind string) []types.UdpSocketInfo {
+
+	var socketInfo []types.UdpSocketInfo
+	connections, _ := net.Connections(kind)
+
+	for _, con := range connections {
+
+		process, _ := process.NewProcess(con.Pid)
+
+		user, _ := process.Username()
+		programName, _ := process.Name()
+
+		info := types.UdpSocketInfo{Protocol: kind, LocalIP: con.Laddr.IP,
+			LocalPort: convertPortToStr(con.Laddr.Port), RemoteIP: con.Raddr.IP,
+			RemotePort: convertPortToStr(con.Raddr.Port), User: user,
+			Pid: con.Pid, ProgramName: programName}
+
+		socketInfo = append(socketInfo, info)
+	}
+
+	return socketInfo
+}
+
 func convertPortToStr(port uint32) string {
 	var localPort string
 	if port == 0 {

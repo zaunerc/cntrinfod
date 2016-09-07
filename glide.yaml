@@ -16,3 +16,5 @@ import:
   subpackages:
   - context
 - package: github.com/davecgh/go-spew/spew
+- package: github.com/drael/GOnetstat
+

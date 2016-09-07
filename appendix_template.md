@@ -4,9 +4,17 @@
 
 ## Host info
 
-* Hostname: {{.HostsHostname}}
+* Hostname: {{.HostHostname}}
+* [Further container host info](hostinfo)
 
 ## Container info
 
 * Hostname: {{.ContainerHostname}}
+
+### netstat
+
+### ps
+
+### pstree
+
 

@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/zaunerc/cntinsight/docker"
+	"github.com/zaunerc/cntinsight/system"
 
 	"github.com/shurcooL/github_flavored_markdown"
 	"github.com/shurcooL/github_flavored_markdown/gfmstyle"
@@ -50,7 +51,17 @@ func enrichMd(readme []byte) []byte {
 
 	appendixTemplate, error := template.ParseFiles("appendix_template.md")
 	var appendixBuffer bytes.Buffer
-	error = appendixTemplate.Execute(&appendixBuffer, nil)
+
+	// TODO
+	system.FetchNetstatTcp()
+	system.FetchNetstatTcp6()
+
+	vars := map[string]interface{}{
+		"ContainerHostname": system.FetchContainerHostname(),
+		"HostHostname":      docker.FetchHostHostname(),
+	}
+
+	error = appendixTemplate.Execute(&appendixBuffer, vars)
 
 	if error != nil {
 		fmt.Printf("Error while processing template: >%s<.", error)
@@ -245,8 +256,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, `<html><head><meta charset="utf-8"><link href="/assets/gfm.css" media="all" rel="stylesheet" type="text/css" /><link href="//cdnjs.cloudflare.com/ajax/libs/octicons/2.1.2/octicons.css" media="all" rel="stylesheet" type="text/css" /></head><body><article class="markdown-body entry-content" style="padding: 30px;">`)
 	w.Write(page.Html)
 	io.WriteString(w, `</article></body></html>`)
-
-	docker.FetchHostsHostname()
 }
 
 func logHandler(w http.ResponseWriter, r *http.Request) {

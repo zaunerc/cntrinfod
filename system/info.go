@@ -102,3 +102,29 @@ func convertPortToStr(port uint32) string {
 
 	return localPort
 }
+
+func FetchProcessInfo() []types.ProcessInfo {
+
+	var processInfo []types.ProcessInfo
+	pids, _ := process.Pids()
+
+	for _, pid := range pids {
+
+		p, _ := process.NewProcess(pid)
+
+		user, _ := p.Username()
+		tty, _ := p.Terminal()
+		name, _ := p.Name()
+		exe, _ := p.Exe()
+		cwd, _ := p.Cwd()
+		cmd, _ := p.Cmdline()
+
+		info := types.ProcessInfo{Pid: pid, User: user,
+			Tty: tty, Name: name,
+			Exe: exe, Cwd: cwd, Cmd: cmd}
+
+		processInfo = append(processInfo, info)
+	}
+
+	return processInfo
+}

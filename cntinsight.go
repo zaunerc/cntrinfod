@@ -57,6 +57,7 @@ func enrichMd(readme []byte) []byte {
 		"HostHostname":      docker.FetchHostHostname(),
 		"TcpSocketInfo":     system.FetchTcp46SocketInfo(),
 		"UdpSocketInfo":     system.FetchUdp46SocketInfo(),
+		"ProcessInfo":       system.FetchProcessInfo(),
 	}
 
 	error = appendixTemplate.Execute(&appendixBuffer, vars)

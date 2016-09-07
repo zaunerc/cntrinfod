@@ -25,7 +25,12 @@
 {{range .UdpSocketInfo}}| {{.Protocol}} | {{.LocalIP}}:{{.LocalPort}} | {{.RemoteIP}}:{{.RemotePort}} | {{.User}} | {{.Pid}} | {{.ProgramName}} |
 {{end}}
 
-### ps
+### Running processes
+
+| PID | User | Name |  Current workding dir | Command line | Terminal |
+|-----|------|------|-----------------------|--------------|----------|
+{{range .ProcessInfo}}| {{.Pid}} | {{.User}} | {{.Name}} | {{.Cwd}} | {{.Cmd}} | {{.Tty}} |
+{{end}}
 
 ### pstree
 

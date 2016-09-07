@@ -32,6 +32,9 @@
 {{range .ProcessInfo}}| {{.Pid}} | {{.User}} | {{.Name}} | {{.Cwd}} | {{.Cmd}} | {{.Tty}} |
 {{end}}
 
-### pstree
+### Process Tree (pstree -p)
 
+<pre>
+{{.ProcessTree}}
+</pre>
 

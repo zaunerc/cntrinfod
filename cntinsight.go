@@ -58,6 +58,7 @@ func enrichMd(readme []byte) []byte {
 		"TcpSocketInfo":     system.FetchTcp46SocketInfo(),
 		"UdpSocketInfo":     system.FetchUdp46SocketInfo(),
 		"ProcessInfo":       system.FetchProcessInfo(),
+		"ProcessTree":       system.FetchProcessTree(),
 	}
 
 	error = appendixTemplate.Execute(&appendixBuffer, vars)

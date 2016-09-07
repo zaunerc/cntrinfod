@@ -6,6 +6,7 @@ import (
 	"github.com/shirou/gopsutil/process"
 	"github.com/zaunerc/cntinsight/types"
 	"os"
+	"os/exec"
 )
 
 func FetchContainerHostname() string {
@@ -127,4 +128,10 @@ func FetchProcessInfo() []types.ProcessInfo {
 	}
 
 	return processInfo
+}
+
+func FetchProcessTree() string {
+
+	out, _ := exec.Command("pstree", "-p").Output()
+	return string(out)
 }

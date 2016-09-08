@@ -17,4 +17,4 @@ import:
   - context
 - package: github.com/davecgh/go-spew/spew
 - package: github.com/aelsabbahy/GOnetstat
-
+- package: github.com/abbot/go-http-auth

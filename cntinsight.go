@@ -16,6 +16,7 @@ import (
 	"github.com/zaunerc/cntinsight/docker"
 	"github.com/zaunerc/cntinsight/system"
 
+	auth "github.com/abbot/go-http-auth"
 	"github.com/shurcooL/github_flavored_markdown"
 	"github.com/shurcooL/github_flavored_markdown/gfmstyle"
 	"github.com/urfave/cli"
@@ -134,6 +135,7 @@ func init() {
 func main() {
 
 	var httpPort int
+	var htpasswd string
 
 	app := cli.NewApp()
 
@@ -143,6 +145,12 @@ func main() {
 			Value:       2020,
 			Usage:       "Listen on port `PORT` for HTTP connections",
 			Destination: &httpPort,
+		},
+		cli.StringFlag{
+			Name: "htpasswd, s",
+			//Value:       "/usr/local/etc/cntrinfod/htpasswd",
+			Usage:       "Use htpasswd `FILE`. Enables user authentication.",
+			Destination: &htpasswd,
 		},
 	}
 
@@ -156,10 +164,10 @@ func main() {
 
 		fmt.Printf("Starting HTTP daemon on port %d...\n", httpPort)
 
-		http.HandleFunc("/", protect(handler))
-		http.HandleFunc("/log", protect(logHandler))
-		http.HandleFunc("/hostinfo", protect(hostInfoHandler))
-		http.HandleFunc("/markdown", protect(markdownHandler))
+		http.HandleFunc("/", protect(handler, htpasswd))
+		http.HandleFunc("/log", protect(logHandler, htpasswd))
+		http.HandleFunc("/hostinfo", protect(hostInfoHandler, htpasswd))
+		http.HandleFunc("/markdown", protect(markdownHandler, htpasswd))
 
 		// Serve the "/assets/gfm.css" file.
 		http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(gfmstyle.Assets)))
@@ -172,23 +180,18 @@ func main() {
 	app.Run(os.Args)
 }
 
-func protect(fn http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if checkAuth(w, r) {
-			fn(w, r)
-		} else {
-			w.Header().Set("WWW-Authenticate", `Basic realm="Linux PAM"`)
-			w.WriteHeader(401)
-			w.Write([]byte("401 Unauthorized\n"))
+func protect(handlerFunc http.HandlerFunc, htpasswdPath string) http.HandlerFunc {
+
+	if htpasswdPath != "" {
+		// read from htpasswd file
+		htpasswd := auth.HtpasswdFileProvider(htpasswdPath)
+		authenticator := auth.NewBasicAuthenticator("cntrinfod htpasswd realm", htpasswd)
+		return auth.JustCheck(authenticator, handlerFunc)
+	} else {
+		return func(w http.ResponseWriter, r *http.Request) {
+			handlerFunc(w, r)
 		}
-
 	}
-}
-
-func checkAuth(w http.ResponseWriter, r *http.Request) bool {
-	user, pass, _ := r.BasicAuth()
-	fmt.Printf("User >%s< trying to authenticate\n", user)
-	return user == "user" && pass == "pass"
 }
 
 func locateReadme() string {

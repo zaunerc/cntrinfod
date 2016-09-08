@@ -134,7 +134,6 @@ func init() {
 func main() {
 
 	var httpPort int
-	var httpsPort int
 
 	app := cli.NewApp()
 
@@ -144,12 +143,6 @@ func main() {
 			Value:       2020,
 			Usage:       "Listen on port `PORT` for HTTP connections",
 			Destination: &httpPort,
-		},
-		cli.IntFlag{
-			Name:        "httpsPort, s",
-			Value:       3030,
-			Usage:       "Listen on port `PORT` for HTTPS connections",
-			Destination: &httpsPort,
 		},
 	}
 

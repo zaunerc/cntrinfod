@@ -14,6 +14,36 @@ func FetchContainerHostname() string {
 	return hostname
 }
 
+func FetchFirstMac() string {
+	
+	var firstMac string
+	
+	interfaces, _ := net.Interfaces()
+	for _, interface := range interfaces {
+		if interface.Name != "lo" {
+			firstMac = interface.HardwareAdress
+			break
+		}
+	}
+
+	return firstMac
+}
+
+func FetchFirstIp() string {
+	
+	var firstIp string
+	
+	interfaces, _ := net.Interfaces()
+	for _, interface := range interfaces {
+		if interface.Name != "lo" {
+			firstMac = interface.HardwareAdress
+			break
+		}
+	}
+
+	return firstIp
+}
+
 func FetchTcp46SocketInfo() []types.TcpSocketInfo {
 
 	var socketInfo []types.TcpSocketInfo

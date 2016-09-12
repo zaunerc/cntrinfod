@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/zaunerc/cntinsight/consul"
 	"github.com/zaunerc/cntinsight/docker"
 	"github.com/zaunerc/cntinsight/system"
 
@@ -136,6 +137,7 @@ func main() {
 
 	var httpPort int
 	var htpasswd string
+	var consulUrl string
 
 	app := cli.NewApp()
 
@@ -152,6 +154,11 @@ func main() {
 			Usage:       "Use htpasswd `FILE`. Enables user authentication.",
 			Destination: &htpasswd,
 		},
+		cli.StringFlag{
+			Name:        "consulUrl, c",
+			Usage:       "Register container with consul at `URL`. Enables consul registration.",
+			Destination: &consulUrl,
+		},
 	}
 
 	app.Email = "christoph.zauner@NLLK.net"
@@ -161,6 +168,10 @@ func main() {
 	app.Usage = "Container Insight: HTTP daemon which exposes and augments the containers REAMDE.md"
 
 	app.Action = func(c *cli.Context) error {
+
+		if consulUrl != "" {
+			consul.ScheduleRegistration(consulUrl)
+		}
 
 		fmt.Printf("Starting HTTP daemon on port %d...\n", httpPort)
 

@@ -15,13 +15,13 @@ func FetchContainerHostname() string {
 }
 
 func FetchFirstMac() string {
-	
+
 	var firstMac string
-	
-	interfaces, _ := net.Interfaces()
-	for _, interface := range interfaces {
-		if interface.Name != "lo" {
-			firstMac = interface.HardwareAdress
+
+	nics, _ := net.Interfaces()
+	for _, nic := range nics {
+		if nic.Name != "lo" {
+			firstMac = nic.HardwareAddr
 			break
 		}
 	}
@@ -30,13 +30,15 @@ func FetchFirstMac() string {
 }
 
 func FetchFirstIp() string {
-	
+
 	var firstIp string
-	
-	interfaces, _ := net.Interfaces()
-	for _, interface := range interfaces {
-		if interface.Name != "lo" {
-			firstMac = interface.HardwareAdress
+
+	nics, _ := net.Interfaces()
+	for _, nic := range nics {
+		if nic.Name != "lo" {
+			if len(nic.Addrs) > 0 {
+				firstIp = nic.Addrs[0].Addr
+			}
 			break
 		}
 	}

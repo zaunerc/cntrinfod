@@ -5,19 +5,20 @@ import "time"
 import "fmt"
 import "math/rand"
 import "github.com/zaunerc/cntinsight/system"
+import "github.com/zaunerc/cntinsight/docker"
 import "strconv"
 
 /**
  * ScheduleRegistration return immediately after the
  * container registration job is scheduled.
  */
-func ScheduleRegistration(consulUrl string) {
-	fmt.Printf("Scheduling registration task using consul URL >%s<.\n", consulUrl)
+func ScheduleRegistration(consulUrl string, cntrInfodHttpPort int) {
 	serviceId := RandStringBytesMaskImprSrc(8)
-	go registerContainer(consulUrl, 5, serviceId)
+	fmt.Printf("Scheduling registration task using consul URL >%s< and service id >%s<.\n", consulUrl, serviceId)
+	go registerContainer(consulUrl, cntrInfodHttpPort, 5, serviceId)
 }
 
-func registerContainer(consulUrl string, sleepSeconds int, serviceId string) {
+func registerContainer(consulUrl string, cntrInfodHttpPort int, sleepSeconds int, serviceId string) {
 	for {
 		fmt.Printf("Registering container...\n")
 
@@ -33,8 +34,9 @@ func registerContainer(consulUrl string, sleepSeconds int, serviceId string) {
 		kv := consul.KV()
 
 		// cntrInfodUrl
-		data := &consulapi.KVPair{Key: "containers/" + serviceId + "/cntrInfodUrl",
-			Value: []byte("XXXXX")}
+		cntrInfodHttpUrl := "http://" + system.FetchContainerHostname() + ":" + strconv.Itoa(cntrInfodHttpPort)
+		data := &consulapi.KVPair{Key: "containers/" + serviceId + "/cntrInfodHttpUrl",
+			Value: []byte(cntrInfodHttpUrl)}
 		_, err = kv.Put(data, nil)
 		if err != nil {
 			fmt.Printf("Error while trying to register container: %s\n", err)
@@ -42,8 +44,9 @@ func registerContainer(consulUrl string, sleepSeconds int, serviceId string) {
 		}
 
 		// MAC
+		macAdress := system.FetchFirstMac()
 		data = &consulapi.KVPair{Key: "containers/" + serviceId + "/macAdress",
-			Value: []byte("XXXXX")}
+			Value: []byte(macAdress)}
 		_, err = kv.Put(data, nil)
 		if err != nil {
 			fmt.Printf("Error while trying to register container: %s\n", err)
@@ -51,8 +54,9 @@ func registerContainer(consulUrl string, sleepSeconds int, serviceId string) {
 		}
 
 		// IP Adress
+		ipAdress := system.FetchFirstIp()
 		data = &consulapi.KVPair{Key: "containers/" + serviceId + "/ipAdress",
-			Value: []byte("XXXXX")}
+			Value: []byte(ipAdress)}
 		_, err = kv.Put(data, nil)
 		if err != nil {
 			fmt.Printf("Error while trying to register container: %s\n", err)
@@ -73,6 +77,16 @@ func registerContainer(consulUrl string, sleepSeconds int, serviceId string) {
 		hostname := system.FetchContainerHostname()
 		data = &consulapi.KVPair{Key: "containers/" + serviceId + "/hostname",
 			Value: []byte(hostname)}
+		_, err = kv.Put(data, nil)
+		if err != nil {
+			fmt.Printf("Error while trying to register container: %s\n", err)
+			return
+		}
+
+		// HostHostname
+		hostHostname := docker.FetchHostHostname()
+		data = &consulapi.KVPair{Key: "containers/" + serviceId + "/hostinfo/hostname",
+			Value: []byte(hostHostname)}
 		_, err = kv.Put(data, nil)
 		if err != nil {
 			fmt.Printf("Error while trying to register container: %s\n", err)

@@ -170,7 +170,7 @@ func main() {
 	app.Action = func(c *cli.Context) error {
 
 		if consulUrl != "" {
-			consul.ScheduleRegistration(consulUrl)
+			consul.ScheduleRegistration(consulUrl, httpPort)
 		}
 
 		fmt.Printf("Starting HTTP daemon on port %d...\n", httpPort)

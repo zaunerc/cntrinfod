@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/shirou/gopsutil/net"
 	"github.com/shirou/gopsutil/process"
-	"github.com/zaunerc/cntinsight/types"
+	"github.com/zaunerc/cntrinfod/types"
 	"os"
 	"os/exec"
 )

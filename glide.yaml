@@ -1,4 +1,4 @@
-package: github.com/zaunerc/cntinsight
+package: github.com/zaunerc/cntrinfod
 import:
 - package: github.com/docker/engine-api
   version: release/1.12

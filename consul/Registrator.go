@@ -4,8 +4,8 @@ import consulapi "github.com/hashicorp/consul/api"
 import "time"
 import "fmt"
 import "math/rand"
-import "github.com/zaunerc/cntinsight/system"
-import "github.com/zaunerc/cntinsight/docker"
+import "github.com/zaunerc/cntrinfod/system"
+import "github.com/zaunerc/cntrinfod/docker"
 import "strconv"
 
 /**

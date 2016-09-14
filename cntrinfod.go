@@ -13,9 +13,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/zaunerc/cntinsight/consul"
-	"github.com/zaunerc/cntinsight/docker"
-	"github.com/zaunerc/cntinsight/system"
+	"github.com/zaunerc/cntrinfod/consul"
+	"github.com/zaunerc/cntrinfod/docker"
+	"github.com/zaunerc/cntrinfod/system"
 
 	auth "github.com/abbot/go-http-auth"
 	"github.com/shurcooL/github_flavored_markdown"
@@ -165,7 +165,7 @@ func main() {
 	app.Author = "Christoph Zauner"
 	app.Version = "0.2.1"
 	// cntrinfod, cntinfod
-	app.Usage = "Container Insight: HTTP daemon which exposes and augments the containers REAMDE.md"
+	app.Usage = "Container Info Daemon: HTTP daemon which exposes and augments the containers REAMDE.md"
 
 	app.Action = func(c *cli.Context) error {
 

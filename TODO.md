@@ -3,8 +3,7 @@
 * Use []byte instead of []string. Most stdlib functions require this data type.
 * Log file beautifier JS lib.
 * Truncate / delete logs.
-* Show generated Markdown.
-* DO not throw away HTTP server error status. It may fail to start if trying to start
+* Do not throw away HTTP server error status. It may fail to start if trying to start
   the server on a port <1024 when not running as root.
 * Implement SSL.
 * Read connection info from process descriptor using gopsutil.

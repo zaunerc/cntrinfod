@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
@@ -49,7 +50,7 @@ func convertMdToHtml(readme []byte) (*Page, error) {
  */
 func enrichMd(readme []byte) []byte {
 
-	appendixTemplate, error := template.ParseFiles("appendix_template.md")
+	appendixTemplate, error := template.ParseFiles(path.Join(staticDataDir, "appendix_template.md"))
 	var appendixBuffer bytes.Buffer
 
 	vars := map[string]interface{}{
@@ -133,6 +134,8 @@ func init() {
 	//log.SetOutput(os.Stdout)
 }
 
+var staticDataDir string
+
 func main() {
 
 	var httpPort int
@@ -159,6 +162,12 @@ func main() {
 			Usage:       "Register container with consul at `URL`. Enables consul registration.",
 			Destination: &consulUrl,
 		},
+		cli.StringFlag{
+			Name:        "staticDataDir, d",
+			Value:       "./static_data/",
+			Usage:       "Directory containing static web site files.",
+			Destination: &staticDataDir,
+		},
 	}
 
 	app.Email = "christoph.zauner@NLLK.net"
@@ -173,6 +182,7 @@ func main() {
 			consul.ScheduleRegistration(consulUrl, httpPort)
 		}
 
+		fmt.Printf("Serving static files from >%s<\n", getAbsolutePath(staticDataDir))
 		fmt.Printf("Starting HTTP daemon on port %d...\n", httpPort)
 
 		http.HandleFunc("/", protect(handler, htpasswd))
@@ -269,7 +279,7 @@ func logHandler(w http.ResponseWriter, r *http.Request) {
 	pathToLogFiles, _ := parseLogFilePathsFromMd(locateReadme())
 	logs, _ := readLogFiles(pathToLogFiles)
 
-	t, error := template.ParseFiles("log.html")
+	t, error := template.ParseFiles(path.Join(staticDataDir, "log.html"))
 
 	currentDateAndTime := time.Now().Format("2006-01-02 15:04:05")
 
@@ -286,7 +296,7 @@ func logHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func hostInfoHandler(w http.ResponseWriter, r *http.Request) {
-	t, error := template.ParseFiles("hostinfo.html")
+	t, error := template.ParseFiles(path.Join(staticDataDir, "hostinfo.html"))
 
 	hostinfo := docker.FetchHostInfo()
 	error = t.Execute(w, hostinfo)
@@ -301,9 +311,22 @@ func markdownHandler(w http.ResponseWriter, r *http.Request) {
 	readmeAsMarkdown := getReadmeAsMarkdown(locateReadme())
 	enrichedReadme := enrichMd(readmeAsMarkdown)
 
-	t, error := template.ParseFiles("markdown.html")
+	t, error := template.ParseFiles(path.Join(staticDataDir, "markdown.html"))
 	error = t.Execute(w, string(enrichedReadme))
 	if error != nil {
 		fmt.Printf("Error while processing template: >%s<.", error)
 	}
+}
+
+func getAbsolutePath(name string) string {
+	if path.IsAbs(name) {
+		return name
+	}
+	wd, err := os.Getwd()
+
+	if err != nil {
+		panic(fmt.Sprintf("Error while trying to get current working dir: %s", err))
+	}
+
+	return path.Join(wd, name)
 }

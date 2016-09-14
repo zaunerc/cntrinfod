@@ -172,7 +172,7 @@ func main() {
 
 	app.Email = "christoph.zauner@NLLK.net"
 	app.Author = "Christoph Zauner"
-	app.Version = "0.2.1"
+	app.Version = "0.2.2"
 	// cntrinfod, cntinfod
 	app.Usage = "Container Info Daemon: HTTP daemon which exposes and augments the containers REAMDE.md"
 

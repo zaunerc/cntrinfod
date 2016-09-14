@@ -24,6 +24,6 @@ _testmain.go
 *.prof
 
 *.swp
-cntinsight
+cntrinfod
 glide.lock
 vendor/

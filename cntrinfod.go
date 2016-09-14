@@ -164,7 +164,7 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:        "staticDataDir, d",
-			Value:       "./static_data/",
+			Value:       "/usr/local/share/cntrinfod/",
 			Usage:       "Directory containing static web site files.",
 			Destination: &staticDataDir,
 		},

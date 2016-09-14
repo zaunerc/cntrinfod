@@ -48,7 +48,7 @@ mkdir -p "$ARCHIVE_ROOT/usr/local/share/cntrinfod"
 cp ../cntrinfod "$ARCHIVE_ROOT/usr/local/bin"
 cp -r ../static_data/* "$ARCHIVE_ROOT/usr/local/share/cntrinfod"
 
-ARCHIVE="cntinsight-v$VERSION-$ARCH-$STDLIB.tar.gz"
+ARCHIVE="cntrinfod-v$VERSION-$ARCH-$STDLIB.tar.gz"
 tar -czf "$ARCHIVE" -C "$ARCHIVE_ROOT" usr
 
 cat << EOF

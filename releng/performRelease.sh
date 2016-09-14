@@ -3,37 +3,6 @@
 set -e
 #set -x
 
-function confirm {
-    read -r -p "${1} [y/N] " response
-    case $response in
-        [yY]) 
-            true
-            ;;
-        *)
-            false
-            ;;
-    esac
-}
-
-function panic_if_working_is_copy_dirty {
-	if [ $(git status --porcelain | wc -l) -ne 0 ]; then
-		echo "Error: Git working directory is dirty."
-		#exit 1
-	fi
-}
-
-function execute {
-	CMD=${1}
-	echo -e "---> Executing: $CMD"
-	eval $CMD
-}
-
-function error_exit
-{
-	echo "$1" 1>&2
-	exit 1
-}
-
 function usage {
     echo "Usage: $0 [VERSION] [NEXT VERSION]"
     echo "Example: $0 0.2.0 0.2.1"
@@ -50,6 +19,8 @@ NEXT_VERSION="$2-SNAPSHOT"
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 cd "$SCRIPT_DIR/.."
 echo "Changed current working dir to $(pwd)"
+
+source $SCRIPT_DIR/common.sh
 
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 if [ "$CURRENT_BRANCH" != "master" ]; then
@@ -111,7 +82,7 @@ execute 'git commit -a -m "Starting development iteration on $NEXT_VERSION."'
 cat << EOF
 
 YOU CAN NOW PUSH THE CHANGES TO ORIGIN. EXECUTE:
-\$ git push --follow-tags master dev
+\$ git push --follow-tags origin master dev
 
 EOF
 

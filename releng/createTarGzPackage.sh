@@ -19,6 +19,17 @@ ARCH="$2"
 STDLIB="$3"
 
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+source $SCRIPT_DIR/common.sh
+
+cd "$SCRIPT_DIR/../"
+echo "Changed current working dir to $(pwd)"
+
+panic_if_working_is_copy_dirty
+
+execute 'git checkout v$VERSION'
+execute 'go test'
+execute 'go build'
+
 cd "$SCRIPT_DIR"
 echo "Changed current working dir to $(pwd)"
 

@@ -56,7 +56,7 @@ cat << EOF
 * $ARCHIVE successfully created:
 *
 
-tar -tvzf "$ARCHIVE"
+$(tar -tvzf "$ARCHIVE")
 
 *
 ************************************************************

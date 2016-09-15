@@ -19,7 +19,14 @@ func ScheduleRegistration(consulUrl string, cntrInfodHttpPort int) {
 }
 
 func registerContainer(consulUrl string, cntrInfodHttpPort int, sleepSeconds int, serviceId string) {
+	firstIteration := true
 	for {
+		if firstIteration {
+			firstIteration = false
+		} else {
+			time.Sleep(time.Duration(sleepSeconds) * time.Second)
+		}
+
 		fmt.Printf("Registering container...\n")
 
 		config := consulapi.DefaultConfig()
@@ -28,7 +35,7 @@ func registerContainer(consulUrl string, cntrInfodHttpPort int, sleepSeconds int
 
 		if err != nil {
 			fmt.Printf("Error while trying to register container: %s\n", err)
-			return
+			continue
 		}
 
 		kv := consul.KV()
@@ -40,7 +47,7 @@ func registerContainer(consulUrl string, cntrInfodHttpPort int, sleepSeconds int
 		_, err = kv.Put(data, nil)
 		if err != nil {
 			fmt.Printf("Error while trying to register container: %s\n", err)
-			return
+			continue
 		}
 
 		// MAC
@@ -50,7 +57,7 @@ func registerContainer(consulUrl string, cntrInfodHttpPort int, sleepSeconds int
 		_, err = kv.Put(data, nil)
 		if err != nil {
 			fmt.Printf("Error while trying to register container: %s\n", err)
-			return
+			continue
 		}
 
 		// IP Adress
@@ -60,7 +67,7 @@ func registerContainer(consulUrl string, cntrInfodHttpPort int, sleepSeconds int
 		_, err = kv.Put(data, nil)
 		if err != nil {
 			fmt.Printf("Error while trying to register container: %s\n", err)
-			return
+			continue
 		}
 
 		// Unix Epoch Timestamp
@@ -70,7 +77,7 @@ func registerContainer(consulUrl string, cntrInfodHttpPort int, sleepSeconds int
 		_, err = kv.Put(data, nil)
 		if err != nil {
 			fmt.Printf("Error while trying to register container: %s\n", err)
-			return
+			continue
 		}
 
 		// Hostname
@@ -80,7 +87,7 @@ func registerContainer(consulUrl string, cntrInfodHttpPort int, sleepSeconds int
 		_, err = kv.Put(data, nil)
 		if err != nil {
 			fmt.Printf("Error while trying to register container: %s\n", err)
-			return
+			continue
 		}
 
 		// HostHostname
@@ -90,11 +97,10 @@ func registerContainer(consulUrl string, cntrInfodHttpPort int, sleepSeconds int
 		_, err = kv.Put(data, nil)
 		if err != nil {
 			fmt.Printf("Error while trying to register container: %s\n", err)
-			return
+			continue
 		}
 
 		fmt.Printf("Successfully registered container. Next registration in %d seconds...\n", sleepSeconds)
-		time.Sleep(time.Duration(sleepSeconds) * time.Second)
 	}
 }
 

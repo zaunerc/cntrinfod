@@ -199,9 +199,12 @@ func main() {
 		http.HandleFunc("/log", protect(logHandler, htpasswd))
 		http.HandleFunc("/hostinfo", protect(hostInfoHandler, htpasswd))
 		http.HandleFunc("/markdown", protect(markdownHandler, htpasswd))
+		http.HandleFunc("/pstree", protect(pstreeHandler, htpasswd))
 
 		// Serve the "/assets/gfm.css" file.
 		http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(gfmstyle.Assets)))
+
+		http.Handle("/statictest/", http.StripPrefix("/statictest", http.FileServer(http.Dir("statictest"))))
 
 		http.ListenAndServe(":"+strconv.Itoa(httpPort), nil)
 
@@ -323,6 +326,15 @@ func markdownHandler(w http.ResponseWriter, r *http.Request) {
 
 	t, error := template.ParseFiles(path.Join(staticDataDir, "markdown.html"))
 	error = t.Execute(w, string(enrichedReadme))
+	if error != nil {
+		fmt.Printf("Error while processing template: >%s<.", error)
+	}
+}
+
+func pstreeHandler(w http.ResponseWriter, r *http.Request) {
+
+	t, error := template.ParseFiles(path.Join(staticDataDir, "pstree.html"))
+	error = t.Execute(w, nil)
 	if error != nil {
 		fmt.Printf("Error while processing template: >%s<.", error)
 	}

@@ -8,6 +8,8 @@ import:
   - client
   - types
 - package: github.com/shurcooL/github_flavored_markdown
+  # Commit 22598d2 broke the build.
+  version: 2f65fea412bf5aaf701025444a6b7f4f53366494
   subpackages:
   - gfmstyle
 - package: github.com/urfave/cli

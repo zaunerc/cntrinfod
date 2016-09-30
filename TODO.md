@@ -9,3 +9,6 @@
 * Read connection info from process descriptor using gopsutil.
 * Implement process tree in Go. See e.g. https://play.golang.org/p/VWR9zSoC-p.
 * Template caching.
+* Navbar in README.md.
+* Show number of lines in parenthesis.
+

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -31,9 +32,10 @@ type Page struct {
 }
 
 type Log struct {
-	Path       string
-	ParentPath string
-	Text       string
+	Path        string
+	FileName    string
+	Lines       string
+	RecentLines string
 }
 
 func convertMdToHtml(readme []byte) (*Page, error) {
@@ -122,7 +124,15 @@ func readLogFiles(pathToLogFiles *[]string) (*[]Log, error) {
 			lines = append(lines, scanner.Text())
 		}
 
-		log := Log{Path: pathToLogFile, ParentPath: pathToLogFile, Text: strings.Join(lines, "\n")}
+		threshhold := 250
+		var recentLines []string
+		if len(lines) > threshhold {
+			recentLines = lines[len(lines)-threshhold:]
+		} else {
+			recentLines = lines
+		}
+
+		log := Log{Path: pathToLogFile, FileName: filepath.Base(pathToLogFile), Lines: strings.Join(lines, "\n"), RecentLines: strings.Join(recentLines, "\n")}
 		logs = append(logs, log)
 	}
 

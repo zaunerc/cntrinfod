@@ -1,24 +1,56 @@
 <html>
+<head>
+	<meta charset="utf-8">
 
-	<head></head>
-
-	<body>
+	<title>Container Info: Log files</title>
 		
-	<h1>Various informations</h1>
+	<!-- jQuery -->
+	<script type="text/javascript" charset="utf8" src="//code.jquery.com/jquery-3.1.0.min.js"></script>
+
+	<!-- Bootstrap (requires: jQuery) -->
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1">	
+</head>
+
+<body>
+
+	<nav class="navbar navbar-default">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<a class="navbar-brand" href="./">README.md</a>
+			</div> 
+			<ul class="nav navbar-nav">
+				<li><a href="#description">Description</a></li>
+				{{range .Logs}}
+				<li><a href="#{{.FileName}}">{{.FileName}}</a></li>
+				{{end}}
+			</ul>
+		</div>
+	</nav>
+
+	<div class="container">
+		
+		<div class="jumbotron" id="description">
+			<h1>Description</h1>
+			<p>This site displays the contents of all the log files
+			listed in the containers README.md file. To limit the
+			volume of the data only the last 250 lines of each log file
+			are displayed. 
+			The page was generated on {{.CurrentDateAndTime}}.</p>
+		</div>
 	
-	<ul>
-		<li>Current date and time: {{.CurrentDateAndTime}}</li>
-	</ul>
+		{{range .Logs}}
+		<div class="panel panel-primary" id={{.FileName}}>
+			<div class="panel-heading">{{.Path}}</div>
+			<div class="panel-body">
+				<pre>{{.RecentLines}}</pre>
+			</div>
+		</div>
+		{{end}}
+		
+	</div> <!-- container div -->
 
-	<h1>Log files</h1>
-
-	{{range .Logs}}
-		<h2>{{.Path}}</h2>
-<pre>
-{{.Text}}
-</pre>
-	{{end}}
-
-	</body>
-
+</body>
 </html>
+

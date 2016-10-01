@@ -67,7 +67,7 @@ var svg = d3.select("body").append("svg")
                                     margin.top + ")");
 
 // load the external data
-d3.csv("statictest/ps.csv", function(error, data) {
+d3.json("statictest/ps.json", function(error, data) {
 
   // *********** Convert flat data into a nice tree ***************
   // create a name: node map

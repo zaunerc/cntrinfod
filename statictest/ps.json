@@ -1,0 +1,155 @@
+[
+  {
+    "name": 0,
+    "parent": "",
+    "CPU": 0,
+    "SIZE": 0,
+    "COMMAND": "start",
+    "RUSER": "nul",
+    "S": "u"
+  },
+  {
+    "name": 1,
+    "parent": 0,
+    "CPU": 0,
+    "SIZE": 1140,
+    "COMMAND": "init",
+    "RUSER": "root",
+    "S": "S"
+  },
+  {
+    "name": 2,
+    "parent": 0,
+    "CPU": 0,
+    "SIZE": 0,
+    "COMMAND": "kthreadd",
+    "RUSER": "root",
+    "S": "S"
+  },
+  {
+    "name": 3,
+    "parent": 2,
+    "CPU": 0,
+    "SIZE": 0,
+    "COMMAND": "ksoftirqd/0",
+    "RUSER": "root",
+    "S": "S"
+  },
+  {
+    "name": 5,
+    "parent": 2,
+    "CPU": 0,
+    "SIZE": 0,
+    "COMMAND": "kworker/0:0H",
+    "RUSER": "root",
+    "S": "S"
+  },
+  {
+    "name": 6,
+    "parent": 2,
+    "CPU": 0,
+    "SIZE": 0,
+    "COMMAND": "kworker/u2:0",
+    "RUSER": "root",
+    "S": "S"
+  },
+  {
+    "name": 7,
+    "parent": 2,
+    "CPU": 0,
+    "SIZE": 0,
+    "COMMAND": "migration/0",
+    "RUSER": "root",
+    "S": "S"
+  },
+  {
+    "name": 8,
+    "parent": 2,
+    "CPU": 0,
+    "SIZE": 0,
+    "COMMAND": "rcu_bh",
+    "RUSER": "root",
+    "S": "S"
+  },
+  {
+    "name": 9,
+    "parent": 2,
+    "CPU": 0,
+    "SIZE": 0,
+    "COMMAND": "rcuob/0",
+    "RUSER": "root",
+    "S": "S"
+  },
+  {
+    "name": 10,
+    "parent": 2,
+    "CPU": 0,
+    "SIZE": 0,
+    "COMMAND": "rcu_sched",
+    "RUSER": "root",
+    "S": "S"
+  },
+  {
+    "name": 11,
+    "parent": 2,
+    "CPU": 0,
+    "SIZE": 0,
+    "COMMAND": "rcuos/0",
+    "RUSER": "root",
+    "S": "S"
+  },
+  {
+    "name": 12,
+    "parent": 2,
+    "CPU": 0,
+    "SIZE": 0,
+    "COMMAND": "watchdog/0",
+    "RUSER": "root",
+    "S": "S"
+  },
+  {
+    "name": 13,
+    "parent": 2,
+    "CPU": 0,
+    "SIZE": 0,
+    "COMMAND": "khelper",
+    "RUSER": "root",
+    "S": "S"
+  },
+  {
+    "name": 14,
+    "parent": 2,
+    "CPU": 0,
+    "SIZE": 0,
+    "COMMAND": "kdevtmpfs",
+    "RUSER": "root",
+    "S": "S"
+  },
+  {
+    "name": 15,
+    "parent": 2,
+    "CPU": 0,
+    "SIZE": 0,
+    "COMMAND": "netns",
+    "RUSER": "root",
+    "S": "S"
+  },
+  {
+    "name": 16,
+    "parent": 2,
+    "CPU": 0,
+    "SIZE": 0,
+    "COMMAND": "writeback",
+    "RUSER": "root",
+    "S": "S"
+  },
+  {
+    "name": 17,
+    "parent": 2,
+    "CPU": 0,
+    "SIZE": 0,
+    "COMMAND": "kintegrityd",
+    "RUSER": "root",
+    "S": "S"
+  }
+]

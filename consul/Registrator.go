@@ -8,19 +8,36 @@ import "github.com/zaunerc/cntrinfod/system"
 import "github.com/zaunerc/cntrinfod/docker"
 import "strconv"
 
+var consulClient *consulapi.Client
+
+func createConsulClient(consulUrl string) (*consulapi.Client, error) {
+	config := consulapi.DefaultConfig()
+	config.Address = consulUrl
+	consul, err := consulapi.NewClient(config)
+
+	return consul, err
+}
+
 /**
  * ScheduleRegistration return immediately after the
  * container registration job is scheduled.
  */
 func ScheduleRegistration(consulUrl string, cntrInfodHttpPort int) {
-	serviceId := RandStringBytesMaskImprSrc(8)
-	fmt.Printf("Scheduling registration task using consul URL >%s< and service id >%s<.\n", consulUrl, serviceId)
-	go registerContainer(consulUrl, cntrInfodHttpPort, 5, serviceId)
+
+	consulClient, err := createConsulClient(consulUrl)
+	if err != nil {
+		fmt.Printf("Disabling consul registration. Error while trying to create consul HTTP client: %s", err)
+	} else {
+		serviceId := RandStringBytesMaskImprSrc(8)
+		fmt.Printf("Scheduling registration task using consul URL >%s< and service id >%s<.\n", consulUrl, serviceId)
+		go registerContainer(consulClient, cntrInfodHttpPort, 5, serviceId)
+	}
 }
 
-func registerContainer(consulUrl string, cntrInfodHttpPort int, sleepSeconds int, serviceId string) {
+func registerContainer(consul *consulapi.Client, cntrInfodHttpPort int, sleepSeconds int, serviceId string) {
 	firstIteration := true
 	for {
+
 		if firstIteration {
 			firstIteration = false
 		} else {
@@ -29,22 +46,13 @@ func registerContainer(consulUrl string, cntrInfodHttpPort int, sleepSeconds int
 
 		fmt.Printf("Registering container...\n")
 
-		config := consulapi.DefaultConfig()
-		config.Address = consulUrl
-		consul, err := consulapi.NewClient(config)
-
-		if err != nil {
-			fmt.Printf("Error while trying to register container: %s\n", err)
-			continue
-		}
-
 		kv := consul.KV()
 
 		// cntrInfodUrl
 		cntrInfodHttpUrl := "http://" + system.FetchContainerHostname() + ":" + strconv.Itoa(cntrInfodHttpPort)
 		data := &consulapi.KVPair{Key: "containers/" + serviceId + "/cntrInfodHttpUrl",
 			Value: []byte(cntrInfodHttpUrl)}
-		_, err = kv.Put(data, nil)
+		_, err := kv.Put(data, nil)
 		if err != nil {
 			fmt.Printf("Error while trying to register container: %s\n", err)
 			continue

@@ -5,34 +5,54 @@
 package docker
 
 import (
+	"fmt"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/docker/engine-api/client"
 	"golang.org/x/net/context"
 )
 
+// FetchHostName returns the hostname of the Docker
+// host OS. In case of any errors an empty string
+// is returned.
 func FetchHostHostname() string {
-	defaultHeaders := map[string]string{"User-Agent": "engine-api-cli-1.0"}
-	cli, err := client.NewClient("unix:///var/run/docker.sock", "v1.22", nil, defaultHeaders)
+
+	cli, err := GetDockerClientForUrl("unix:///var/run/docker.sock", "v1.22")
+
 	if err != nil {
-		// Only root may connect to docker socket.
-		panic(err)
+		fmt.Printf("Error while trying to get docker HTTP client: %s", err)
+		return ""
 	}
 
-	info, _ := cli.Info(context.Background())
+	info, err := cli.Info(context.Background())
 
-	return info.Name
+	if err != nil {
+		fmt.Printf("Error while calling docker HTTP API: %s", err)
+		return ""
+	} else {
+		return info.Name
+	}
 }
 
+// FetchHostInfo returns the Docker servers
+// https://godoc.org/github.com/docker/engine-api/client#Client.Info data
+// structure. It is converted to a string and formatted in
+// a nice way by go-spew.
 func FetchHostInfo() string {
-	defaultHeaders := map[string]string{"User-Agent": "engine-api-cli-1.0"}
-	cli, err := client.NewClient("unix:///var/run/docker.sock", "v1.22", nil, defaultHeaders)
+
+	cli, err := GetDockerClientForUrl("unix:///var/run/docker.sock", "v1.22")
+
 	if err != nil {
-		// Only root may connect to docker socket.
-		panic(err)
+		fmt.Printf("Error while trying to get docker HTTP client: %s", err)
+		return ""
 	}
 
-	info, _ := cli.Info(context.Background())
-	infoString := spew.Sdump(info)
+	info, err := cli.Info(context.Background())
 
-	return infoString
+	if err != nil {
+		fmt.Printf("Error while calling docker HTTP API: %s", err)
+		return ""
+	} else {
+		infoString := spew.Sdump(info)
+		return infoString
+	}
+
 }

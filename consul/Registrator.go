@@ -1,11 +1,12 @@
 package consul
 
-import consulapi "github.com/hashicorp/consul/api"
+import consulapi "github.com/zaunerc/consul/api"
 import "time"
 import "fmt"
 import "math/rand"
 import "github.com/zaunerc/cntrinfod/system"
 import "github.com/zaunerc/cntrinfod/docker"
+import cc "github.com/zaunerc/go_consul_commons"
 import "strconv"
 
 var consulClient *consulapi.Client
@@ -23,18 +24,12 @@ func createConsulClient(consulUrl string) (*consulapi.Client, error) {
  * container registration job is scheduled.
  */
 func ScheduleRegistration(consulUrl string, cntrInfodHttpPort int) {
-
-	consulClient, err := createConsulClient(consulUrl)
-	if err != nil {
-		fmt.Printf("Disabling consul registration. Error while trying to create consul HTTP client: %s", err)
-	} else {
-		serviceId := RandStringBytesMaskImprSrc(8)
-		fmt.Printf("Scheduling registration task using consul URL >%s< and service id >%s<.\n", consulUrl, serviceId)
-		go registerContainer(consulClient, cntrInfodHttpPort, 5, serviceId)
-	}
+	serviceId := RandStringBytesMaskImprSrc(8)
+	fmt.Printf("Scheduling registration task using consul URL >%s< and service id >%s<.\n", consulUrl, serviceId)
+	go registerContainer(consulUrl, cntrInfodHttpPort, 5, serviceId)
 }
 
-func registerContainer(consul *consulapi.Client, cntrInfodHttpPort int, sleepSeconds int, serviceId string) {
+func registerContainer(consulUrl string, cntrInfodHttpPort int, sleepSeconds int, serviceId string) {
 	firstIteration := true
 	for {
 
@@ -46,13 +41,19 @@ func registerContainer(consul *consulapi.Client, cntrInfodHttpPort int, sleepSec
 
 		fmt.Printf("Registering container...\n")
 
-		kv := consul.KV()
+		consulClient, err := cc.GetConsulClientForUrl(consulUrl)
+		if err != nil {
+			fmt.Printf("Skipping current consul registration. Error while trying to get consul HTTP client: %s", err)
+			continue
+		}
+
+		kv := consulClient.KV()
 
 		// cntrInfodUrl
 		cntrInfodHttpUrl := "http://" + system.FetchContainerHostname() + ":" + strconv.Itoa(cntrInfodHttpPort)
 		data := &consulapi.KVPair{Key: "containers/" + serviceId + "/cntrInfodHttpUrl",
 			Value: []byte(cntrInfodHttpUrl)}
-		_, err := kv.Put(data, nil)
+		_, err = kv.Put(data, nil)
 		if err != nil {
 			fmt.Printf("Error while trying to register container: %s\n", err)
 			continue

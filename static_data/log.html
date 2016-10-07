@@ -44,7 +44,11 @@
 		<div class="panel panel-primary" id={{.FileName}}>
 			<div class="panel-heading">{{.Path}}</div>
 			<div class="panel-body">
+				{{if .RecentLines}}
 				<pre>{{.RecentLines}}</pre>
+				{{else}}
+				Log file is empty.
+				{{end}}
 			</div>
 		</div>
 		{{end}}

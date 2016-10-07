@@ -47,10 +47,52 @@ func convertMdToHtml(readme []byte) (*Page, error) {
 	return &Page{Path: location, Markdown: enrichedReadme, Html: readmeAsHtml}, nil
 }
 
+func augmentMd(readme []byte) []byte {
+
+	readmeAsStr := string(readme)
+	readmeSlice := strings.Split(readmeAsStr, "\n")
+	host := system.FetchContainerHostname()
+
+	matcher := regexp.MustCompile(`\* \*(.*)\* on port (\d*)/(\w*)\.`)
+	for idx, line := range readmeSlice {
+		match := matcher.FindStringSubmatch(line)
+		if len(match) > 0 {
+			description := match[1]
+			port := match[2]
+			protocol := match[3]
+
+			readmeSlice[idx] = `* [` + description + `](` + protocol + `://` + host + `:` + port + `)`
+		}
+	}
+
+	matcherWithPath := regexp.MustCompile(`\* \*(.*)\* on port (\d*)/(\w*)\ \(path (.*)\)\.`)
+	for idx, line := range readmeSlice {
+		match := matcherWithPath.FindStringSubmatch(line)
+		if len(match) > 0 {
+			description := match[1]
+			port := match[2]
+			protocol := match[3]
+			path := match[4]
+
+			readmeSlice[idx] = `* [` + description + `](` + protocol + `://` + host + `:` + port + path + `)`
+		}
+	}
+
+	var changedReadme []byte
+	for _, line := range readmeSlice {
+		changedReadme = append(changedReadme, line...)
+		changedReadme = append(changedReadme, "\n"...)
+	}
+
+	return changedReadme
+}
+
 /**
  * Adds various informations to the README.md of the container.
  */
 func enrichMd(readme []byte) []byte {
+
+	readme = augmentMd(readme)
 
 	appendixTemplate, error := template.ParseFiles(path.Join(staticDataDir, "appendix_template.md"))
 	var appendixBuffer bytes.Buffer
@@ -182,7 +224,7 @@ func main() {
 
 	app.Email = "christoph.zauner@NLLK.net"
 	app.Author = "Christoph Zauner"
-	app.Version = "0.2.5"
+	app.Version = "0.2.6-SNAPSHOT"
 	// cntrinfod, cntinfod
 	app.Usage = "Container Info Daemon: HTTP daemon which exposes and augments the containers REAMDE.md"
 

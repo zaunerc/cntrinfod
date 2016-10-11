@@ -11,4 +11,4 @@
 * Template caching.
 * Navbar in README.md.
 * Show number of lines in parenthesis.
-
+* Container info should show container ID, image name and container name. This helps if neither image name nor container name have been set manually by the user.

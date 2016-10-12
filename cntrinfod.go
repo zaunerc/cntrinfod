@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -200,6 +201,7 @@ func main() {
 		http.HandleFunc("/hostinfo", protect(hostInfoHandler, htpasswd))
 		http.HandleFunc("/markdown", protect(markdownHandler, htpasswd))
 		http.HandleFunc("/pstree", protect(pstreeHandler, htpasswd))
+		http.HandleFunc("/api/proc", protect(apiProcHandler, htpasswd))
 
 		// Serve the "/assets/gfm.css" file.
 		http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(gfmstyle.Assets)))
@@ -338,6 +340,20 @@ func pstreeHandler(w http.ResponseWriter, r *http.Request) {
 	if error != nil {
 		fmt.Printf("Error while processing template: >%s<.", error)
 	}
+}
+
+func apiProcHandler(w http.ResponseWriter, r *http.Request) {
+
+	procInfo := system.FetchProcessInfo()
+	procInfoJson, err := json.Marshal(procInfo)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(procInfoJson)
 }
 
 func getAbsolutePath(name string) string {

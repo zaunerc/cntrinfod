@@ -145,6 +145,7 @@ func FetchProcessInfo() []types.ProcessInfo {
 
 		p, _ := process.NewProcess(pid)
 
+		parentPid, _ := p.Ppid()
 		user, _ := p.Username()
 		tty, _ := p.Terminal()
 		name, _ := p.Name()
@@ -152,7 +153,8 @@ func FetchProcessInfo() []types.ProcessInfo {
 		cwd, _ := p.Cwd()
 		cmd, _ := p.Cmdline()
 
-		info := types.ProcessInfo{Pid: pid, User: user,
+		info := types.ProcessInfo{Pid: pid,
+			ParentPid: parentPid, User: user,
 			Tty: tty, Name: name,
 			Exe: exe, Cwd: cwd, Cmd: cmd}
 

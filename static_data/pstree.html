@@ -67,12 +67,13 @@ var svg = d3.select("body").append("svg")
                                     margin.top + ")");
 
 // load the external data
-d3.json("statictest/ps.json", function(error, data) {
+d3.json("api/proc", function(error, data) {
+//d3.json("statictest/ps.json", function(error, data) {
 
   // *********** Convert flat data into a nice tree ***************
   // create a name: node map
   var dataMap = data.reduce(function(map, node) {
-    map[node.name] = node;
+    map[node.Pid] = node;
     return map;
   }, {});
 
@@ -80,7 +81,7 @@ d3.json("statictest/ps.json", function(error, data) {
   var treeData = [];
   data.forEach(function(node) {
     // add to parent
-    var parent = dataMap[node.parent];
+    var parent = dataMap[node.ParentPid];
     if (parent) {
       // create child array if it doesn't exist
       (parent.children || (parent.children = []))
@@ -126,11 +127,10 @@ function update(source) {
           .duration(200)
           .style("opacity", .9);
         div .html(
-            "PID: " + d.name + "<br/>" + 
-            "Command: " + d.COMMAND + "<br/>" +
-            "User: " + d.RUSER + "<br/>" +
-            "%CPU: " + d.CPU + "<br/>" +
-            "Memory: " + d.SIZE
+            "PID: " + d.Pid + "<br/>" + 
+            "User: " + d.User + "<br/>" +
+            "Name: " + d.Name + "<br/>" +
+            "Cmd: " + d.Cmd
             )
           .style("left", (d3.event.pageX) + "px")
           .style("top", (d3.event.pageY - 28) + "px");

@@ -10,9 +10,7 @@
   div.tooltip {
     position: absolute;
     text-align: left;
-    width: 180px;
-    height: 80px;
-    padding: 2px;
+    padding: 5px;
     font: 12px sans-serif;
     background: lightsteelblue;
     border: 0px;
@@ -33,6 +31,8 @@
     stroke: #ccc;
     stroke-width: 2px;
   }
+  
+  .ttlabel { font-weight: bold; }
   
     </style>
 
@@ -127,13 +127,17 @@ function update(source) {
           .duration(200)
           .style("opacity", .9);
         div .html(
-            "PID: " + d.Pid + "<br/>" + 
-            "User: " + d.User + "<br/>" +
-            "Name: " + d.Name + "<br/>" +
-            "Cmd: " + d.Cmd
+			"<span class=\"ttlabel\">PID:</span> " + d.Pid + "<br/>" + 
+            "<span class=\"ttlabel\">User:</span> " + d.User + "<br/>" +
+            "<span class=\"ttlabel\">Tty:</span> " + d.Tty + "<br/>" +
+            "<span class=\"ttlabel\">Name:</span> " + d.Name + "<br/>" +
+            "<span class=\"ttlabel\">Executable path:</span> " + d.Exe + "<br/>" +
+            "<span class=\"ttlabel\">Cwd:</span> " + d.Cwd + "<br/>" +
+            "<span class=\"ttlabel\">Cmd:</span> " + d.Cmd
             )
+		  // tooltip offsett	
           .style("left", (d3.event.pageX) + "px")
-          .style("top", (d3.event.pageY - 28) + "px");
+          .style("top", (d3.event.pageY + 20) + "px");
         })
       .on("mouseout", function(d) {
         div.transition()
@@ -152,10 +156,10 @@ function update(source) {
     .attr("dy", ".35em")
     .attr("text-anchor", function(d) { 
       return d.children || d._children ? "end" : "start"; })
-    .text(function(d) { return d.COMMAND; })
+	.text(function(d) { return d.Name + " (" + d.Pid  + ")" ; })
     .style("fill-opacity", 1e-6);
 
-// add the tool tip
+  // add the tool tip
   var div = d3.select("body").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);

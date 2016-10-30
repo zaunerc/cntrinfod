@@ -33,15 +33,51 @@
   }
   
   .ttlabel { font-weight: bold; }
+
+/*
+ Axis stuff
+*/
   
+.axis path,
+.axis line {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-family: sans-serif;
+    font-size: 11px;
+}
+
+.svg_container {
+	border:5px solid black;
+}
+
+.buttons {
+  position: absolute;
+  right: 30px;
+  top: 30px;
+}
+
     </style>
 
   </head>
 
   <body>
 
+<div class="buttons">
+	<button data-zoom="+1">Zoom In</button>
+	<button data-zoom="-1">Zoom Out</button>
+	<button id="reset">Reset</button>
+</div>
+
 <!-- load the d3.js library -->  
 <script src="http://d3js.org/d3.v3.min.js"></script>
+
+
+
+<div class="svg_container"></div>
   
 <script>
 
@@ -59,28 +95,112 @@ var tree = d3.layout.tree()
 var diagonal = d3.svg.diagonal()
   .projection(function(d) { return [d.y, d.x]; });
 
-var zoom = d3.behavior.zoom()
-    .scaleExtent([1, 10])
-    .on("zoom", zoomed);
+// ---------
+// RESET BUTTON
 
+d3.select("button#reset").on("click", reset);
+
+function reset() {
+  d3.transition().duration(750).tween("zoom", function() {
+    var ix = d3.interpolate(x.domain(), [-width / 2, width / 2]),
+        iy = d3.interpolate(y.domain(), [-height / 2, height / 2]);
+    return function(t) {
+      zoom.x(x.domain(ix(t))).y(y.domain(iy(t)));
+      zoomed();
+    };
+  });
+}
+
+//
+// ----------
+
+var zoom = d3.behavior.zoom()
+    // min, max zoom factor
+	.scaleExtent([0.25, 1])
+    .on("zoom", zoomed);
+/*
 var drag = d3.behavior.drag()
     .origin(function(d) { return d; })
     .on("dragstart", dragstarted)
     .on("drag", dragged)
     .on("dragend", dragended);
-
-var svg = d3.select("body").append("svg")
+*/
+// Create the SVG viewport
+var svg = d3.select("div.svg_container").append("svg")
+  .call(zoom)
   .attr("width", width + margin.right + margin.left)
   .attr("height", height + margin.top + margin.bottom)
   .append("g")
   .attr("transform", "translate(" + margin.left + "," + 
                                     margin.top + ")")
-  .call(zoom);
+  //.call(zoom);
+  ;
+// --------------
 
-function zoomed() {
-  container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+// -------------
+// ZOOM
+
+d3.selectAll("button[data-zoom]")
+    .on("click", clicked);
+function clicked() {
+  svg.call(zoom.event); // https://github.com/mbostock/d3/issues/2387
+
+  // Record the coordinates (in data space) of the center (in screen space).
+  var center0 = zoom.center(), translate0 = zoom.translate(), coordinates0 = coordinates(center0);
+  zoom.scale(zoom.scale() * Math.pow(2, +this.getAttribute("data-zoom")));
+
+  // Translate back to the center.
+  var center1 = point(coordinates0);
+  zoom.translate([translate0[0] + center0[0] - center1[0], translate0[1] + center0[1] - center1[1]]);
+
+  svg.transition().duration(750).call(zoom.event);
 }
 
+function coordinates(point) {
+  var scale = zoom.scale(), translate = zoom.translate();
+  return [(point[0] - translate[0]) / scale, (point[1] - translate[1]) / scale];
+}
+
+function point(coordinates) {
+  var scale = zoom.scale(), translate = zoom.translate();
+  return [coordinates[0] * scale + translate[0], coordinates[1] * scale + translate[1]];
+}
+
+//
+// -------------
+
+var xAxisScale = d3.scale.linear()
+	.domain([0, width])
+	.range([0, width]);
+
+var xAxis = d3.svg.axis().scale(xAxisScale);
+
+//Create an SVG group Element for the Axis elements and call the xAxis function
+var xAxisGroup = svg.append("g")
+	.attr("class", "axis")
+	.call(xAxis);
+
+// ----------------
+
+var yAxisScale = d3.scale.linear()
+	.domain([0, height])
+	.range([0, height]);
+
+var yAxis = d3.svg.axis()
+	.orient("left")
+	.scale(yAxisScale);
+
+//Create an SVG group Element for the Axis elements and call the xAxis function
+var yAxisGroup = svg.append("g")
+	.attr("class", "axis")
+	.call(yAxis);
+
+// ------------
+
+function zoomed() {
+  svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+}
+/*
 function dragstarted(d) {
   d3.event.sourceEvent.stopPropagation();
   d3.select(this).classed("dragging", true);
@@ -93,7 +213,7 @@ function dragged(d) {
 function dragended(d) {
   d3.select(this).classed("dragging", false);
 }
-
+*/
 // load the external data
 d3.json("api/proc", function(error, data) {
 //d3.json("statictest/ps.json", function(error, data) {
